@@ -26,6 +26,10 @@ def getMJOData(raw_file=default_MJO_raw, csv_file=default_MJO_csv, force_load=Fa
             for i in range(len(y))
         ]
 
+        phase_angle, phase_mycompute = computeMJOPhase(*toRMM(OMI1, OMI2, index="OMI"))
+
+        if np.any(phase != phase_mycompute):
+            raise Exception("Warning: the phase I compute is not consistent with the phase given from the dataset.")
 
 
         MJO_df = pd.DataFrame(data=dict(
@@ -33,6 +37,7 @@ def getMJOData(raw_file=default_MJO_raw, csv_file=default_MJO_csv, force_load=Fa
             OMI1 = OMI1,
             OMI2 = OMI2,
             phase = phase,
+            phase_angle = phase_angle,
             magnitude = magnitude,
         ))
 
@@ -120,8 +125,8 @@ def detectMJOEvents(RMM1s, RMM2s, expand_day=1, phase_angle_tolerance_deg=45.0):
                 pass
 
             else:
-                MJO_evt_end_idx = i
-                MJO_length = MJO_evt_end_idx - MJO_evt_beg_idx
+                MJO_evt_end_idx = i - 1
+                MJO_length = MJO_evt_end_idx - MJO_evt_beg_idx + 1
                 MJO_evts.append((MJO_evt_beg_idx, MJO_evt_end_idx, MJO_length))
 
                 detected_MJO = False
